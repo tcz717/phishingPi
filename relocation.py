@@ -87,7 +87,7 @@ try:
 			http.reason='Moved temporarily'
 			http.status=302
 			http.headers['Location']='http://10.0.0.1:8080'
-			http.summary()
+			# http.summary()
 			sock.send(str(http))
 	    sock.close()
 	    print 'Connection from %s:%s closed.' % addr
