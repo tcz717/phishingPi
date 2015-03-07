@@ -16,17 +16,8 @@ def mac16(mac):
 
 try:
 	def http_handle(req,smac,dmac,sip,dip,spo,dpo):
-		if dip!='10.0.0.1':
-			http=dpkt.http.Response()
-			http.reason='Moved temporarily'
-			http.status=302
-			http.headers['Location']='http://10.0.0.1'
+		print str(req)
 
-			pkt=IP(src=dip,dst=sip)/TCP(sport=dpo,dport=spo,flags='')/Raw(str(http))
-
-			sendp(pkt,iface="wlan0")
-
-			print '---------http relocation---------'
 
 	def dns_handle(req,smac,dmac,sip,dip,spo,dpo):
 		if not isinstance(req,dpkt.dns.DNS):
@@ -144,8 +135,8 @@ try:
 				tp=ip.data
 				sport=tp.sport
 				dport=tp.dport
-				# if tp.dport == 80 and tp.data.startswith('GET'):
-				# 	http_handle(tp.data,smac,dmac,sip,dip,sport,dport)
+				if tp.dport == 80 and tp.data.startswith('GET'):
+					http_handle(tp.data,smac,dmac,sip,dip,sport,dport)
 				# elif ip.dst=='abcd':
 				# 	tcp_trip(ip)
 				# else:
