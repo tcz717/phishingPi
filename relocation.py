@@ -86,7 +86,7 @@ try:
 			http=dpkt.http.Response()
 			http.reason='Moved temporarily'
 			http.status=302
-			http.headers['Location']='http://10.0.0.1:8080'
+			http.headers['Location']='http://10.0.0.1:8000'
 			# http.summary()
 			sock.send(str(http))
 	    sock.close()
