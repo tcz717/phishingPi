@@ -26,6 +26,7 @@ try:
 		if req.qr==dpkt.dns.DNS_Q and req.opcode==dpkt.dns.DNS_QUERY\
 		and len(req.qd)==1 and len(req.an)==0 and len(req.ns)==0\
 		and req.qd[0].cls==dpkt.dns.DNS_IN and req.qd[0].type==dpkt.dns.DNS_A:
+			
 			req.op = dpkt.dns.DNS_RA
 			req.rcode = dpkt.dns.DNS_RCODE_NOERR
 			req.qr = dpkt.dns.DNS_R
@@ -36,19 +37,9 @@ try:
 			arr.name = req.qd[0].name
 			arr.rdata = str2ip('10.0.0.1')
 			arr.rlen=4
-
 			req.an.append(arr)
 
-			# ip.src,ip.dst=ip.dst,ip.src
-			# ip.data.sport,ip.data.dport=ip.data.dport,ip.data.sport
-			# ip.data.data=req
-			# ip.data.ulen=len(ip.data)
-			# ip.len = len(ip)
-
-			# pkt=IP(str(ip))
-
 			pkt=IP(src=dip,dst=sip)/UDP(sport=dpo,dport=spo)/Raw(str(req))
-
 			pkt.summary()
 
 			send(pkt,iface="wlan0")
@@ -78,12 +69,11 @@ try:
 			http.reason='Moved temporarily'
 			http.status=302
 			http.headers['Location']='http://10.0.0.1:8000'
-			# http.summary()
 			sock.send(str(http))
 	    sock.close()
 	    print 'Connection from %s:%s closed.' % addr
 	def http_listener():
-		print 'http start 000000000000'
+		print 'http start'
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.bind(('10.0.0.1', 80))
 		s.listen(5)
@@ -101,51 +91,30 @@ try:
 
 	for rtime,pack in wlan:
 		id=id+1
-		# print "["+str(id)+"]"+time.ctime(rtime)
 		ep=dpkt.ethernet.Ethernet(pack)
 		smac='%d:%d:%d:%d:%d:%d'%tuple(map(ord,list(ep.src)))
 		dmac='%d:%d:%d:%d:%d:%d'%tuple(map(ord,list(ep.dst)))
-		# print "[ether] "+smac+" -> "+dmac
 
 		if isinstance(ep.data,dpkt.arp.ARP):
 			ap=ep.data
-			# sip='%d.%d.%d.%d'%tuple(map(ord,list(ap.spa)))
-			# dip='%d.%d.%d.%d'%tuple(map(ord,list(ap.tpa)))
-			# qmac='%d:%d:%d:%d:%d:%d'%tuple(map(ord,list(ap.sha)))
-			# rmac='%d:%d:%d:%d:%d:%d'%tuple(map(ord,list(ap.tha)))
-			# print '[arp] op=%d'%ap.op
-			# print 'src: %s\t%s'%(sip,qmac)
-			# print 'dst: %s\t%s'%(dip,rmac)
 		elif isinstance(ep.data,dpkt.ip.IP):
 			ip=ep.data
 			sip='%d.%d.%d.%d'%tuple(map(ord,list(ip.src)))
 			dip='%d.%d.%d.%d'%tuple(map(ord,list(ip.dst)))
-			# print '[ip] %s -> %s len=%d'%(sip,dip,ip.len)
 			if isinstance(ip.data,dpkt.icmp.ICMP):
 				print '[icmp]'
 			elif isinstance(ip.data,dpkt.udp.UDP):
-				# print '[udp]'
 				up=ip.data
 				sport=up.sport
 				dport=up.dport
 				if up.dport == 53:
 					dns_handle(dpkt.dns.DNS(up.data),smac,dmac,sip,dip,sport,dport)
 			elif isinstance(ip.data,dpkt.tcp.TCP):
-				# print '[tcp]'
 				tp=ip.data
 				sport=tp.sport
 				dport=tp.dport
 				if tp.dport == 80 and tp.data.startswith('GET'):
 					http_handle(tp.data,smac,dmac,sip,dip,sport,dport)
-				# elif ip.dst=='abcd':
-				# 	tcp_trip(ip)
-				# else:
-				# 	print type(tp.data)
-			# else:
-				# print type(ip.data)
-		# else:
-			# print type(ep.data)
-		# print
 except KeyboardInterrupt:
     import sys
     sys.exit()
