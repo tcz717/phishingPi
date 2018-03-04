@@ -1,7 +1,7 @@
 # phishingPi
 This tool will set a soft-ap named QQ-Wifi(or other confusing name you like). As someone connect this AP, his browser will pop a page and request user's QQ account and password to login. After he logins, the page will return no permission and save all infomation in json files. You know..
 
-###How to use it
+### How to use it
 1. Have a `raspberryPi`
 2. Have a `wireless card` which supports raspberryPi
 3. Connect your wireless card to raspberryPi and install the driver
